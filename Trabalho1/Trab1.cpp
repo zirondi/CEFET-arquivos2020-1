@@ -32,13 +32,13 @@ void ordena(FILE *f, buffer *buff, int qtd_bloco){
 }
 
 
-Endereco leia(FILE *f, buffer *buff, long indice, int qtd_bloco){
+Endereco* leia(FILE *f, buffer *buff, long indice, int qtd_bloco){
     int indiceBloco = indice / TAMANHO;
     long indiceNoBloco = indice / qtd_bloco;
 
     //Se os ids batem, o bloco na memoria é o bloco que queremos acessar
     if(indiceBloco == buff->blocoId){
-        return buff->endArr[indiceNoBloco];
+        return &buff->endArr[indiceNoBloco];
     }
 
     //Se não for o bloco que queremos acessar, verificamos se o bloco esta a frente do bloco na memoria ou atrás dele
@@ -57,7 +57,7 @@ Endereco leia(FILE *f, buffer *buff, long indice, int qtd_bloco){
 
         fread(buff->endArr, TAM_BLOCO, TAMANHO, f);
 
-        return buff->endArr[indiceNoBloco];
+        return &buff->endArr[indiceNoBloco];
     }
 
     //Meu bloco esta atrás do atual na memória, então faço um rewind e leio de bloco em bloco
@@ -70,10 +70,10 @@ Endereco leia(FILE *f, buffer *buff, long indice, int qtd_bloco){
 
     fread(buff->endArr, TAM_BLOCO, TAMANHO, f);
 
-    return buff->endArr[indiceNoBloco];
+    return &buff->endArr[indiceNoBloco];
 }
 
-void escreva(FILE *f, buffer *buff, long indice, int qtd_bloco, Endereco e){
+void escreva(FILE *f, buffer *buff, long indice, int qtd_bloco, Endereco *e){
     int indiceBloco = indice / TAMANHO;
     long indiceNoBloco = indice / qtd_bloco;
 
@@ -89,7 +89,7 @@ void escreva(FILE *f, buffer *buff, long indice, int qtd_bloco, Endereco e){
 
         fseek(f, offset, SEEK_CUR);
 
-        buff->endArr[indiceNoBloco] = e;
+        buff->endArr[indiceNoBloco] = *e;
 
         fwrite(buff->endArr, sizeof(Endereco), TAMANHO, f);
     }
@@ -113,18 +113,26 @@ void escreva(FILE *f, buffer *buff, long indice, int qtd_bloco, Endereco e){
 int main(int argc, char** argv){
     
     FILE *f;
+    buffer b;
     long tamanhoArquivo;
     int qtd_bloco;
 
-    f = fopen("cep.dat", "r");
+    f = fopen("C:\\Users\\Zirondi\\Desktop\\cep.dat", "r");
     fseek(f,0,SEEK_END);
     tamanhoArquivo = ftell(f);
     qtd_bloco = tamanhoArquivo / TAM_BLOCO;
     rewind(f);
 
+    long ind = 500000;
+    Endereco *e = leia(f, &b, ind, qtd_bloco);
+
+    printf(e->cep);
 
 
 
+
+
+    /**
     printf("%s", argv[0]);
 
     //Tratamento de erro
@@ -134,6 +142,7 @@ int main(int argc, char** argv){
     }
 
     ordena(f);
+    **/
 
 
 }
