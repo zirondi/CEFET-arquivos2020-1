@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <iostream>
-#include <algorithm>
+#include <string.h>
 
-#define TAMANHO 4096 //Quantos endereções vão estar no buffer
+#define TAMANHO 50000 //Quantos endereções vão estar no buffer
 
 
 
@@ -26,13 +26,9 @@ struct _buffer
     int blocoId;
     int qtd_bloco;
     int tam_bloco;
+    long qtd_linhas;
 
 };
-
-void ordena(FILE *f, buffer *buff, int qtd_bloco){
-    
-}
-
 
 Endereco* leia(FILE *f, buffer *buff, long indice){
     int indiceBloco;
@@ -103,6 +99,7 @@ void escreva(FILE *f, buffer *buff, long indice, Endereco *e){
     if(indiceBloco == buff->blocoId){
         buff->endArr[indiceNoBloco] = *e;
         fwrite(buff->endArr, sizeof(Endereco), TAMANHO, f);
+        std::cout << "escrevi no bloco" << std::endl;
     }
 
     else if(indiceBloco > buff->blocoId){
@@ -114,6 +111,7 @@ void escreva(FILE *f, buffer *buff, long indice, Endereco *e){
         buff->endArr[indiceNoBloco] = *e;
 
         fwrite(buff->endArr, sizeof(Endereco), TAMANHO, f);
+        std::cout << "escrevi no bloco da frente" << std::endl;
     }
 
     else{
@@ -125,12 +123,82 @@ void escreva(FILE *f, buffer *buff, long indice, Endereco *e){
         buff->endArr[indiceNoBloco] = *e;
 
         fwrite(buff->endArr, sizeof(Endereco), TAMANHO, f);
+        std::cout << "escrevi voltando mas escrevi" << std::endl;
 
     }
 
 
 }
 
+void swap(FILE *f, buffer *buff, long indice1, long indice2){
+    Endereco temp1, temp2;
+
+    temp1 = *(leia(f, buff, indice1));
+    temp2 = *(leia(f, buff, indice2));
+
+    escreva(f, buff, indice1, &temp2);
+    escreva(f, buff, indice2, &temp1);
+
+    std::cout << "troquei" << std::endl;
+
+
+}
+
+void heapify(FILE *f, buffer *buff, long indice){
+    long raiz = indice;
+    long folhaEsquerda = 2 * raiz + 1;
+    long folhaDireita = 2 * raiz + 2;
+    std::cout << "defini a arvore" << std::endl;
+
+    //char raiz_cep[8], folhaEsquerda_cep[8], folhaDireita_cep[8];
+    Endereco end_raiz, end_folhaEsquerda, end_folhaDireita;
+    
+    
+    end_raiz = *(leia(f, buff, raiz));    
+    end_folhaEsquerda = *(leia(f, buff, folhaEsquerda));
+    end_folhaDireita = *(leia(f, buff, folhaDireita));
+
+
+    
+    
+
+
+
+    if(raiz > folhaEsquerda && strncmp(end_folhaEsquerda.cep, end_raiz.cep,8) > 1){
+        raiz = folhaEsquerda;
+    }
+
+    if(indice > folhaDireita && strncmp(end_folhaDireita.cep, end_raiz.cep,8)>1){
+        raiz = folhaDireita;
+    }
+
+    if(raiz != indice){
+        swap(f, buff, indice, raiz);
+        std::cout << "raiz era maior que indice!" << std::endl;
+        heapify(f, buff, raiz);
+    }
+
+
+}
+
+void heapsort(FILE *f, buffer *buff){
+    std::cout << "entrei no heap" << std::endl;
+    for (long i = buff->qtd_linhas / 2 - 1; i >=0; i--){
+        std::cout << "entrei no loop indice" << i << std::endl;
+        heapify(f, buff, i);
+    }
+
+    std::cout << "heap1" << std::endl;
+
+    for (long i = buff->qtd_linhas - 1; i>=0; i--){
+        swap(f, buff, 0, i);
+
+        heapify(f, buff, 0);
+    }
+
+    std::cout << "heap2" << std::endl;
+    
+}
 
 /**
 Endereco* leiaRecursivo(FILE *f, buffer *buff, long indice, int qtd_bloco){
@@ -178,18 +246,13 @@ int main(int argc, char** argv){
     b.blocoId = 0;
     b.tam_bloco = sizeof(Endereco) * TAMANHO;
     b.qtd_bloco = tamanhoArquivo / b.tam_bloco;
+    b.qtd_linhas = tamanhoArquivo / sizeof(Endereco);
+
 
     fread(b.endArr, sizeof(Endereco), TAMANHO, f);
-    //printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n",b.endArr[0].logradouro,b.endArr[0].bairro,b.endArr[0].cidade,b.endArr[0].uf,b.endArr[0].sigla,b.endArr[0].cep);
-    
-    Endereco *e;
-    e = leia(f, &b, 4096);
 
-    //std::cout << sizeof(b.endArr[0].cep) << std::endl;
-    printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n",e->logradouro,e->bairro,e->cidade,e->uf,e->sigla,e->cep);
-
-    e = leia(f, &b, 699307);   
-    printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n",e->logradouro,e->bairro,e->cidade,e->uf,e->sigla,e->cep);
+    heapsort(f, &b);
+    //std::cout << strncmp("23027015", "2000000", 8);
 
 
 
