@@ -47,20 +47,21 @@ void buscaBinaria(FILE *f, long min, long max, char cp[8]){
     long meio;
     long offset;
     int i = 0;
-    Endereco *e;
+    Endereco e;
 
     while (min <= max){
         i++;
-        meio = min + max / 2;
+        meio = (min + max)/ 2;
         offset = meio * sizeof(Endereco);
         fseek(f, offset, SEEK_SET);
-        fread(e, sizeof(Endereco), 1, f);
+        fread(&e, sizeof(Endereco), 1, f);
 
-        if(min > max){
+        if(strncmp(e.cep, cp, 8) == 0){
+            printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n",e.logradouro,e.bairro,e.cidade,e.uf,e.sigla,e.cep);
             break;
         }
         
-        else if(strncmp(e->cep, cp, 8) > 0){
+        else if(strncmp(e.cep, cp, 8) > 0){
             max = meio + 1;
 
         }
@@ -71,8 +72,8 @@ void buscaBinaria(FILE *f, long min, long max, char cp[8]){
 
     }
 
-    printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n",e->logradouro,e->bairro,e->cidade,e->uf,e->sigla,e->cep);
-    printf("%i vezes", i);
+    
+    printf("%i vezes\n", i);
 
 
     
@@ -82,44 +83,41 @@ int main(int argc, char**argv){
 
     FILE *f;
 
+    
     if(argc != 2)
 	{
 		fprintf(stderr, "USO: %s [CEP]", argv[0]);
 		return 1;
 	}
+    
     /**
+    //Ordenar
     f = fopen("cep.dat", "r");
 
     fseek(f, 0, SEEK_END);
     long tamanhoArquivo = ftell(f);
     long numero_indices = tamanhoArquivo / sizeof(Endereco);
 
-
     rewind(f);
-
     Endereco *e;
     e = (Endereco*) malloc(tamanhoArquivo);
-
     fread(e, sizeof(Endereco), numero_indices, f);
     fclose(f);
 
     qsort(e,numero_indices,sizeof(Endereco),compara);
+
+    f = fopen("cep_ordenado.dat", "w");
+    fwrite(e, sizeof(Endereco), numero_indices, f);
+    fclose(f);
+    free(e);
     **/
-
-    f = fopen("cep_ordenado.dat", "r");
-    long tamanhoArquivo = ftell(f);
-    long numero_indices = tamanhoArquivo / sizeof(Endereco);
-
-    buscaBinaria(f, 0, tamanhoArquivo, argv[1]);
     
-    //Endereco *e;
-    //e = (Endereco*) malloc(tamanhoArquivo);
+   
+    f = fopen("cep_ordenado.dat", "r");
+    fseek(f, 1, SEEK_END);
+    long tamanhoArquivo = ftell(f);
+    rewind(f);
 
-    //char cep[8] = {20780270};
-    //printf("Defini tudo okay");
-    //buscaBinaria(e,argv[1],numero_indices,0);
+    buscaBinaria(f, 0, tamanhoArquivo/sizeof(Endereco), argv[1]);
 
-    //fwrite(e, sizeof(Endereco), numero_indices, f);
-    //fclose(f);
-    //free(e);
 }
