@@ -71,9 +71,8 @@ cpfs = rnd.cpf_list
 
 f = open('./candidatos.dat', 'wb')
 
-count = 0
 for i in range(0,30):
-    if count % 5 == 0:
+    if i % 3 != 0:
         #Pegando a primeira mencao do cpf na lista
         candidate = [ids.pop(), 
         rnd.get_random_curso(), 
@@ -92,8 +91,8 @@ for i in range(0,30):
 
         f.write(candidatoStruct.pack(*candidate_duplicate))
 
-        count += 2
     else:
+
         candidate = [ids.pop(), 
         rnd.get_random_curso(), 
         rnd.format_cpf(cpfs.pop()), 
@@ -103,7 +102,7 @@ for i in range(0,30):
         rnd.get_random_quadro()]
 
         f.write(candidatoStruct.pack(*candidate))
-        count += 1
+
 
 
 f.close()
